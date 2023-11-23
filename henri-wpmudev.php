@@ -30,3 +30,23 @@ $henriWPMUdev = new HenriWPMUDev();
 register_activation_hook(__FILE__, [$henriWPMUdev, 'createTable']);
 register_deactivation_hook(__FILE__, [$henriWPMUdev, 'dropTable']);
 add_shortcode($henriWPMUdev::$shortcode, [$henriWPMUdev, 'index']);
+
+add_action('rest_api_init', function () use ($henriWPMUdev) {
+    register_rest_route(
+        'henri-wpmudev/v1',
+        '/list',
+        array(
+            'methods' => 'POST',
+            'permission_callback' => '__return_true',
+            'callback' => [$henriWPMUdev, 'list']
+        )
+    );
+});
+
+wp_register_script('henri_wpmudev', plugin_dir_url(__FILE__) . 'henri-wpmudev.js', array('jquery'));
+wp_enqueue_script('henri_wpmudev');
+wp_localize_script(
+    'henri_wpmudev',
+    'henri_wpmudev_list',
+    ['url' => site_url('wp-json/henri-wpmudev/v1/list')]
+);
